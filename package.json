@@ -1,5 +1,5 @@
 {
-  "name": "mplsart-apiv6",
+  "name": "mplsart-apiv4",
   "version": "1.0.0",
   "description": "Node/Express API for MPLSART",
   "main": "index.js",
@@ -14,7 +14,9 @@
     "check-types": "tsc --noemit",
     "prettier-format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "eslint": "eslint . --ext .ts",
-    "lint": "npm run eslint && npm run check-types"
+    "lint": "npm run eslint && npm run check-types",
+    "deploy": "gcloud --verbosity=debug --project arts-612 app deploy app.yaml --no-promote --quiet --version",
+    "bd": "npm run lint && npm run build && npm run deploy"
   },
   "repository": {
     "type": "git",
@@ -47,6 +49,8 @@
     "typescript": "^4.6.3"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^1.35.2",
+    "dotenv": "^16.0.0",
     "express": "^4.18.0",
     "morgan": "^1.10.0",
     "swagger-ui-express": "^4.3.0",

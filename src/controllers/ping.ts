@@ -1,5 +1,5 @@
 import { Get, Route } from 'tsoa';
-
+import supabase from '../infrastructure/supabase';
 interface PingResponse {
   message: string;
 }
@@ -8,16 +8,15 @@ interface PingResponse {
 export default class PingController {
   @Get('/')
   public async getMessage(): Promise<PingResponse> {
+    const { data, error } = await supabase.from('Tasks').select();
+
+    let test = 'ol';
+    if (data && data.length > 0) {
+      test = JSON.stringify(data[0]);
+    }
+
     return {
-      message: 'pong'
+      message: `pong ${test}`
     };
   }
 }
-
-interface Test {
-  thing: number;
-}
-
-const x1: Test = { thing: 1 };
-const x2: Test = { thing: 2 };
-console.log([x1, x2]);

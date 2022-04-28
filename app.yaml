@@ -1,0 +1,22 @@
+runtime: nodejs12
+
+service: apiv4
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+
+#instance_class: B1
+#basic_scaling:
+#  max_instances: 1
+#  idle_timeout: 1m
+
+instance_class: F1 # Frontend - 30s timeout 28hours free quota
+automatic_scaling:
+  max_instances: 1
+  min_instances: 0
+  max_idle_instances: 1 # default automatic
+  #target_cpu_utilization: .85 # default .6
+
+inbound_services:
+  - warmup

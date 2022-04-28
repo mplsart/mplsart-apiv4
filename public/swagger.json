@@ -22,7 +22,7 @@
 		"securitySchemes": {}
 	},
 	"info": {
-		"title": "mplsart-apiv6",
+		"title": "mplsart-apiv4",
 		"version": "1.0.0",
 		"description": "Node/Express API for MPLSART",
 		"license": {
@@ -35,7 +35,7 @@
 	},
 	"openapi": "3.0.0",
 	"paths": {
-		"/ping": {
+		"/pingx": {
 			"get": {
 				"operationId": "GetMessage",
 				"responses": {
