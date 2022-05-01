@@ -7,7 +7,7 @@ orgRouter.get('/organizations', async (_req, res, next) => {
   const controller = new OrganizationsController();
 
   try {
-    const response = await controller.getAll();
+    const response = await controller.search('gam');
     return res.send(response);
   } catch (err) {
     next(err);

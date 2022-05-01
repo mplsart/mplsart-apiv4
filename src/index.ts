@@ -13,9 +13,9 @@ const app: Application = express();
 app.set('base', '/api/v4');
 app.use(express.json());
 app.use(morgan('tiny'));
-app.use('/api/v4/public', express.static(path.join(__dirname, '../public')));
 
 // Swagger Docs
+app.use('/api/v4/public', express.static(path.join(__dirname, '../public')));
 app.use(
   '/api/v4/docs',
   swaggerUi.serve,

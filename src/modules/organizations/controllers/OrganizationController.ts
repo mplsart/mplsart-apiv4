@@ -22,14 +22,21 @@ export default class OrganizationsController {
     // TODO: Don't ? go directly to the repository...
 
     const orgRepo = new SupaOrgRepo();
-    const org = await orgRepo.getById(organizationId);
-    return { result: org };
+    const orgOp = await orgRepo.getById(organizationId);
+    return { result: orgOp.get() };
   }
 
   public async getAll(): Promise<OrganizationListResponse> {
     // TODO: Don't ? go directly to the repository...
     const orgRepo = new SupaOrgRepo();
-    const org = await orgRepo.getAll();
-    return { result: org };
+    const orgs = await orgRepo.getAll();
+    return { result: orgs };
+  }
+
+  public async search(term: string): Promise<OrganizationListResponse> {
+    // TODO: Don't ? go directly to the repository...
+    const orgRepo = new SupaOrgRepo();
+    const orgs = await orgRepo.search(term);
+    return { result: orgs };
   }
 }
