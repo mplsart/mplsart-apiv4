@@ -20,7 +20,6 @@ export default class OrganizationsController {
     organizationId: DatabaseId
   ): Promise<OrganizationResponse> {
     // TODO: Don't ? go directly to the repository...
-
     const orgRepo = new SupaOrgRepo();
     const orgOp = await orgRepo.getById(organizationId);
     return { result: orgOp.get() };
@@ -38,5 +37,11 @@ export default class OrganizationsController {
     const orgRepo = new SupaOrgRepo();
     const orgs = await orgRepo.search(term);
     return { result: orgs };
+  }
+
+  public async create(name: string): Promise<OrganizationResponse> {
+    const orgRepo = new SupaOrgRepo();
+    const org = await orgRepo.create(name);
+    return { result: org };
   }
 }

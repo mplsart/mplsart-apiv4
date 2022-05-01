@@ -1,5 +1,34 @@
 // Common Exception Types
 
+export class FieldError extends Error {
+  public code = 'field-error';
+  private field: string;
+
+  constructor(message: string, field: string) {
+    super(message);
+    this.field = field;
+  }
+  public toData() {
+    return { code: this.code, field: this.field, message: this.message };
+  }
+}
+export class DataValidationError extends Error {
+  public code = 'data-validation-error';
+  private errors: FieldError[];
+
+  constructor(message: string, errors: FieldError[]) {
+    super(message);
+    this.errors = errors;
+  }
+  public toData() {
+    return {
+      code: this.code,
+      message: this.message,
+      errors: this.errors.map((e) => e.toData())
+    };
+  }
+}
+
 export class DoesNotExistException extends Error {
   constructor(message: string) {
     super(message);

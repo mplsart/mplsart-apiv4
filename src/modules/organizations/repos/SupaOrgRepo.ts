@@ -24,13 +24,11 @@ export default class SupaOrgRepo implements IOrgRepo {
    * @returns A list of Organizations
    */
   async search(term: string): Promise<Organization[]> {
-    console.log('here...');
     const { data, error } = await supabase
       .from<OrganizationRecord>('Organization')
       .select('*')
       .ilike('name', `%${term}%`);
 
-    console.log(`%${term}%`);
     // TOOD: Search params
     if (error) throw Error(error.message);
     return data.map((o) => o) as Organization[];
@@ -48,14 +46,22 @@ export default class SupaOrgRepo implements IOrgRepo {
 
     // TODO: Map to `Organization`
     const orgDao = data[0] as Organization;
-
     return Optional.ofNonNull(orgDao);
-    //return data[0] as Organization;
   }
 
-  // async create(org: Organization): Promise<Organization> {
-  //   return undefined;
-  // }
+  async create(name: string): Promise<Organization> {
+    const resp = await supabase
+      .from<OrganizationRecord>('Organization')
+      .insert([{ name: name }]);
+
+    const { data, error } = resp;
+
+    if (error) throw Error(error.message); // UUID syntax, etc
+    if (data.length == 0) throw new DoesNotExistException('Resource');
+
+    const orgDao = data[0] as Organization;
+    return orgDao;
+  }
 
   // async update(org: Organization): Promise<Organization> {
   //   return undefined;
