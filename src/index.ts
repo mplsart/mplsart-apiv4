@@ -4,6 +4,8 @@ import morgan from 'morgan';
 import Router from './routes';
 import swaggerUi from 'swagger-ui-express';
 import path from 'path';
+import errorHandler from './infrastructure/middleware/errorhandler';
+import { DoesNotExistException } from './infrastructure/exceptions';
 
 const PORT = process.env.PORT || 8000;
 const app: Application = express();
@@ -26,6 +28,14 @@ app.use(
 
 // Setup Modules
 app.use('/api/v4', Router);
+
+// Catch all unknown routes
+app.all('*', function (req, res, next) {
+  next(new DoesNotExistException('Resource Not Found'));
+});
+
+// Add our error handler last
+app.use(errorHandler);
 
 // Start Server
 app.listen(PORT, () => {
