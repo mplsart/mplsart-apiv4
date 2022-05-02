@@ -4,13 +4,11 @@ DROP TABLE IF EXISTS "OrganizationRoles";
 DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "Organization";
 
-
-
-
 /* Create Organization Table */
 CREATE TABLE "Organization" (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name text,
+  name text NOT NULL,
+  is_squelched boolean DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -20,8 +18,9 @@ COMMENT ON TABLE "Organization" is 'Top Level Organizations';
 /* Create User Table */
 Create TABLE "User" (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name text,
-  is_support boolean,
+  name text NOT NULL,
+  is_support boolean DEFAULT FALSE,
+  is_squelched boolean DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
@@ -29,11 +28,12 @@ Create TABLE "User" (
 /* Create Some Core Organizations */
 COMMENT ON TABLE "User" is 'System Users';
 
-INSERT INTO "Organization" (id, name) 
+INSERT INTO "Organization" (id, is_squelched, name) 
 VALUES 
-('5586d8db-340e-49b7-b22a-9ca26fa2b4b9', 'MPLSART.COM'), 
-('4720e352-9dd2-4b27-8292-3cbf8d50b3a5', 'Gamut'), 
-('7500c9e7-90b7-477c-9b27-bbb9eecc2410', 'Emerging Curators Institute');
+('5586d8db-340e-49b7-b22a-9ca26fa2b4b9', FALSE, 'MPLSART.COM'), 
+('4720e352-9dd2-4b27-8292-3cbf8d50b3a5', FALSE, 'Gamut'), 
+('7500c9e7-90b7-477c-9b27-bbb9eecc2410', FALSE, 'Emerging Curators Institute'),
+('df43fdcf-c57a-4b45-b7d6-8b19e25d57c9', TRUE, 'White Page');
 
 /* Create Some Core Users */
 INSERT INTO "User" (id, name, is_support) 
@@ -74,31 +74,31 @@ VALUES
 ('bbcf6479-245d-42cc-8d5a-7187e6c80a4e', '7500c9e7-90b7-477c-9b27-bbb9eecc2410', 'a38029ac-6c22-4de0-aed3-ecb40288d87d'); -- Blaine
 
 /*  Organization Roles */
-Create TABLE "OrganizationRoles" (
+Create TABLE "OrganizationRole" (
   id BIGSERIAL PRIMARY KEY,
   name text,
   organization_id uuid REFERENCES "Organization" (id),
   UNIQUE(organization_id, name)
 );
 
-INSERT INTO "OrganizationRoles" (id, name, organization_id)
+INSERT INTO "OrganizationRole" (id, name, organization_id)
 VALUES 
 -- system roles
 (1, 'Member', null),
 (2, 'Admin', null);
 
 /*  Organization Roles */
-Create TABLE "OrganizationMembershipRoles" (
+Create TABLE "OrganizationMembershipRole" (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   org_membership_id uuid REFERENCES "OrganizationMembership" (id),
-  org_role_id BIGSERIAL REFERENCES "OrganizationRoles" (id),
-  is_squelched boolean,
+  org_role_id BIGSERIAL REFERENCES "OrganizationRole" (id),
+  is_squelched boolean DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(org_membership_id, org_role_id)
 );
 
-INSERT INTO "OrganizationMembershipRoles" (org_membership_id, org_role_id)
+INSERT INTO "OrganizationMembershipRole" (org_membership_id, org_role_id)
 VALUES 
 
 ('75016c9c-2aca-4495-8f13-19492564a9da', 2), -- Blaine is Org admin of MPLSART

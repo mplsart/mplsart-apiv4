@@ -16,7 +16,7 @@ export default class SupaOrgRepo implements IOrgRepo {
       .select('*');
 
     if (error) throw Error(error.message);
-    return data.map((o) => o) as Organization[];
+    return data.map((o) => o);
   }
 
   /**
@@ -29,7 +29,6 @@ export default class SupaOrgRepo implements IOrgRepo {
       .select('*')
       .ilike('name', `%${term}%`);
 
-    // TOOD: Search params
     if (error) throw Error(error.message);
     return data.map((o) => o) as Organization[];
   }
@@ -41,8 +40,19 @@ export default class SupaOrgRepo implements IOrgRepo {
       .eq('id', organizationId);
 
     const { data, error } = resp;
-    if (error) throw Error(error.message); // UUID syntax, etc
-    if (data.length == 0) throw new DoesNotExistException('Resource');
+
+    // Handle error...
+    // TODO: We may want to validate the id before...
+    if (error) {
+      if (error.code == '22P02') {
+        return Optional.empty();
+      } else {
+        //TODO:  We probably wan to re-work this
+        throw Error(error.message); // UUID syntax, etc
+      }
+    }
+
+    if (data.length == 0) return Optional.empty();
 
     // TODO: Map to `Organization`
     const orgDao = data[0] as Organization;
@@ -55,18 +65,41 @@ export default class SupaOrgRepo implements IOrgRepo {
       .insert([{ name: name }]);
 
     const { data, error } = resp;
-
     if (error) throw Error(error.message); // UUID syntax, etc
     if (data.length == 0) throw new DoesNotExistException('Resource');
-
-    const orgDao = data[0] as Organization;
-    return orgDao;
+    return data[0];
   }
 
-  // async update(org: Organization): Promise<Organization> {
-  //   return undefined;
-  // }
+  async rename(organizationId: string, name: string): Promise<Organization> {
+    const resp = await supabase
+      .from<OrganizationRecord>('Organization')
+      .update({ name: name })
+      .match({ id: organizationId });
 
+    const { data, error } = resp;
+    if (error) throw Error(error.message); // UUID syntax, etc
+    if (data.length == 0) throw new DoesNotExistException('Resource');
+    return data[0];
+  }
+
+  async update(organization: Organization): Promise<Organization> {
+    const o = organization;
+
+    const resp = await supabase
+      .from<OrganizationRecord>('Organization')
+      .update({
+        name: o.name,
+        is_squelched: o.is_squelched
+      })
+      .match({ id: o.id });
+
+    const { data, error } = resp;
+    if (error) throw Error(error.message); // UUID syntax, etc
+    if (data.length == 0) throw new DoesNotExistException('Resource');
+    return data[0];
+  }
+
+  // Delete should only be done internally. Hold off on implementing...
   // async delete(org: Organization): Promise<DatabaseId> {
   //   return undefined;
   // }

@@ -13,6 +13,7 @@ export type UserRecord = {
 export type OrganizationRecord = {
   id: DatabaseId;
   name: string;
+  is_squelched: boolean;
   created_at: DateStamp;
   updated_at: DateStamp;
 };

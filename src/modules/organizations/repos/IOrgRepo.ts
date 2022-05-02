@@ -7,7 +7,6 @@ export default interface IOrgRepo {
   getAll(): Promise<Organization[]>;
   search(term: string): Promise<Organization[]>;
   getById(organizationId: string): Promise<Optional<Organization>>;
-  // create(org: Organization): Promise<Organization>;
-  // update(org: Organization): Promise<Organization>;
-  // delete(org: Organization): Promise<DatabaseId>;
+  create(name: string): Promise<Organization>;
+  update(organization: Organization): Promise<Organization>;
 }
