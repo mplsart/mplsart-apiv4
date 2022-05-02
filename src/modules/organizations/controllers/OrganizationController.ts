@@ -1,6 +1,6 @@
 import { DoesNotExistException } from '../../../infrastructure/exceptions';
 import { DatabaseId } from '~/shared/core/types';
-import { Organization } from '../types';
+import { Organization, OrganizationData } from '../types';
 import IOrgRepo from '../repos/IOrgRepo';
 
 // Controller Types
@@ -28,6 +28,10 @@ export default class OrganizationsController {
     return { result: orgOp.get() };
   }
 
+  /**
+   * Fetch a list of all organizations
+   * @returns A list of Organizations
+   */
   public async getAll(): OrganizationListResponse {
     const orgs = await this.orgRepo.getAll();
     return { result: orgs };
@@ -39,7 +43,8 @@ export default class OrganizationsController {
   }
 
   public async create(name: string): OrganizationResponse {
-    const org = await this.orgRepo.create(name);
+    const tempOrg: OrganizationData = { name: name, is_squelched: false };
+    const org = await this.orgRepo.create(tempOrg);
     return { result: org };
   }
 

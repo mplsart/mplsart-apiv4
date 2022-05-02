@@ -1,6 +1,6 @@
 import supabase from '../../../infrastructure/supabase';
 import IOrgRepo from './IOrgRepo';
-import { Organization } from '../types';
+import { Organization, OrganizationData } from '../types';
 import { DoesNotExistException } from '../../../infrastructure/exceptions';
 import { OrganizationRecord } from './types';
 import { Optional } from 'typescript-optional';
@@ -59,10 +59,17 @@ export default class SupaOrgRepo implements IOrgRepo {
     return Optional.ofNonNull(orgDao);
   }
 
-  async create(name: string): Promise<Organization> {
+  async create(organization: OrganizationData): Promise<Organization> {
+    const o = organization;
+
     const resp = await supabase
       .from<OrganizationRecord>('Organization')
-      .insert([{ name: name }]);
+      .insert([
+        {
+          name: o.name,
+          is_squelched: o.is_squelched
+        }
+      ]);
 
     const { data, error } = resp;
     if (error) throw Error(error.message); // UUID syntax, etc
