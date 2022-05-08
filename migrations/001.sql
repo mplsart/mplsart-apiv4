@@ -1,8 +1,13 @@
-DROP TABLE IF EXISTS "OrganizationMembershipRoles";
+
+DROP TABLE IF EXISTS "OrganizationMembershipRole";
 DROP TABLE IF EXISTS "OrganizationMembership";
-DROP TABLE IF EXISTS "OrganizationRoles";
+DROP TABLE IF EXISTS "OrganizationRole";
 DROP TABLE IF EXISTS "User";
 DROP TABLE IF EXISTS "Organization";
+
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP FUNCTION IF EXISTS handle_new_user;
+
 
 /* Create Organization Table */
 CREATE TABLE "Organization" (
@@ -17,13 +22,65 @@ COMMENT ON TABLE "Organization" is 'Top Level Organizations';
 
 /* Create User Table */
 Create TABLE "User" (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), -- Database ID
+  auth_id uuid REFERENCES auth.users (id), -- supabase auth.users.id
+  primary_email text,
   name text NOT NULL,
+  username text,
+  avatar_url text,
   is_support boolean DEFAULT FALSE,
+  is_initialized boolean DEFAULT FALSE,
   is_squelched boolean DEFAULT FALSE,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
-  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  UNIQUE (primary_email)
 );
+
+/**
+* This trigger automatically creates/updates a User entry when a new user signs up via Supabase Auth.
+*/
+
+CREATE OR REPLACE FUNCTION public.upsert_by_email() 
+RETURNS trigger as $$
+DECLARE TOTAL_USERS_WITH_EMAIL INTEGER;
+BEGIN
+  -- Determine if User by email exists
+  SELECT COUNT(*) INTO TOTAL_USERS_WITH_EMAIL 
+  FROM public."User" 
+  WHERE "primary_email" = new.email;
+
+  -- If exists, update vs insert 
+  IF (new.email IS NOT NULL AND TOTAL_USERS_WITH_EMAIL = 1) THEN
+    -- UPDATE THE EXISTING RECORD
+    RAISE NOTICE 'New Auth User with auth.user.id % triggered UPDATE of existing User. Email: %s', new.id, new.email;
+
+    UPDATE public."User"  
+    SET 
+      auth_id = new.id,
+      name = new.raw_user_meta_data->>'full_name', 
+      avatar_url = new.raw_user_meta_data->>'avatar_url' 
+    WHERE "primary_email" = new.email;
+  ELSE
+    -- INSERT NEW RECORD
+    RAISE NOTICE 'New Auth User with auth.user.id % triggered creation of new User. Email: %s', new.id, new.email;  
+    INSERT INTO public."User" 
+      (auth_id, name, avatar_url, primary_email)
+    VALUES (
+      new.id, 
+      new.raw_user_meta_data->>'full_name', 
+      new.raw_user_meta_data->>'avatar_url', 
+      LOWER(new.email)
+    );
+  END IF;
+  RETURN new;
+END;
+$$ language plpgsql security definer;
+
+-- Wire up trigger
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute procedure public.upsert_by_email();
+
 
 /* Create Some Core Organizations */
 COMMENT ON TABLE "User" is 'System Users';
@@ -36,14 +93,14 @@ VALUES
 ('df43fdcf-c57a-4b45-b7d6-8b19e25d57c9', TRUE, 'White Page');
 
 /* Create Some Core Users */
-INSERT INTO "User" (id, name, is_support) 
+INSERT INTO "User" (id, username, name, primary_email, is_support) 
 VALUES 
-('a38029ac-6c22-4de0-aed3-ecb40288d87d', 'Blaine Garrett', FALSE), 
-('c37c474b-943b-46a5-9d6d-509393fa49cb', 'Katie Garrett', FALSE), 
-('2f2cee3d-43a0-459c-8f34-e029661a47ab', 'Russ White', FALSE), 
-('b3fb0cff-2021-4cf7-8d09-8a7407a84084', 'Cassie Garner', FALSE), 
-('f70275c0-901f-446b-8851-7fb50d4c2cda', 'Nicole Thomas', FALSE),
-('ec9bfbef-d02c-4aaf-bb1d-e74134ba976d', 'Anika Seih', TRUE);
+('a38029ac-6c22-4de0-aed3-ecb40288d87d', 'blaine', 'Blaine Garrett', 'blaine@mplsart.com', FALSE), 
+('c37c474b-943b-46a5-9d6d-509393fa49cb', 'katie', 'Katie Garrett', 'katie@mplsart.com', FALSE), 
+('2f2cee3d-43a0-459c-8f34-e029661a47ab', 'russ', 'Russ White', 'russ@mplsart.com', FALSE), 
+('b3fb0cff-2021-4cf7-8d09-8a7407a84084', 'cassie', 'Cassie Garner', 'cassie@gamutgallerympls.com', FALSE), 
+('f70275c0-901f-446b-8851-7fb50d4c2cda', 'nicole', 'Nicole Thomas', NULL, FALSE),
+('ec9bfbef-d02c-4aaf-bb1d-e74134ba976d', 'anika', 'Anika Seih', NULL, TRUE);
 
 /* Create Org Memberships Table */
 Create TABLE "OrganizationMembership" (
@@ -127,7 +184,7 @@ VALUES
 -- FROM "OrganizationMembership" as m
 -- LEFT JOIN "Organization" as o ON m.organization_id = o.id
 -- LEFT JOIN "User" as u ON m.user_id = u.id
--- LEFT JOIN "OrganizationMembershipRoles" as omr on omr.org_membership_id = m.id
--- LEFT JOIN "OrganizationRoles" r on omr.org_role_id = r.id
+-- LEFT JOIN "OrganizationMembershipRole" as omr on omr.org_membership_id = m.id
+-- LEFT JOIN "OrganizationRole" r on omr.org_role_id = r.id
 -- WHERE r.id IS NOT NULL
 -- ORDER BY o.name, u.name;
