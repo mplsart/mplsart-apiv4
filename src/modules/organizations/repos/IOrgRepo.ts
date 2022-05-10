@@ -1,4 +1,4 @@
-// Generic Org Interface
+// Generic Org Repo Interface
 //import { DatabaseId } from '~/shared/core/types';
 import { Organization, OrganizationData } from '../types';
 import { Optional } from 'typescript-optional';

@@ -6,9 +6,23 @@ import swaggerUi from 'swagger-ui-express';
 import path from 'path';
 import errorHandler from './infrastructure/middleware/errorhandler';
 import { DoesNotExistException } from './infrastructure/exceptions';
+import cors from 'cors';
 
 const PORT = process.env.PORT || 8000;
 const app: Application = express();
+
+// Setup Coors
+const corsOptions = {
+  origin: [
+    'http://localhost:3000',
+    'https://127.0.0.1:4000',
+    'https://www.mplsart.com'
+  ],
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 
 app.set('base', '/api/v4');
 app.use(express.json());

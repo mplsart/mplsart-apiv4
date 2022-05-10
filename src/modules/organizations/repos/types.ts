@@ -1,15 +1,6 @@
 // Database Types
 import { DatabaseId, DateStamp } from '~/shared/core/types';
 
-// TODO: Maybe export this to auth package
-export type UserRecord = {
-  id: DatabaseId;
-  name: string;
-  is_support: boolean;
-  created_at: DateStamp;
-  updated_at: DateStamp;
-};
-
 export type OrganizationRecord = {
   id: DatabaseId;
   name: string;
