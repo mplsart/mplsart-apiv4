@@ -23,7 +23,7 @@ COMMENT ON TABLE "Organization" is 'Top Level Organizations';
 /* Create User Table */
 Create TABLE "User" (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(), -- Database ID
-  auth_id uuid REFERENCES auth.users (id), -- supabase auth.users.id
+  -- auth_id uuid REFERENCES auth.users (id), -- supabase auth.users.id
   primary_email text,
   name text NOT NULL,
   username text,
@@ -35,56 +35,55 @@ Create TABLE "User" (
   updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE (primary_email)
 );
+COMMENT ON TABLE "User" is 'System Users';
 
 /**
 * This trigger automatically creates/updates a User entry when a new user signs up via Supabase Auth.
 */
 
-CREATE OR REPLACE FUNCTION public.upsert_by_email() 
-RETURNS trigger as $$
-DECLARE TOTAL_USERS_WITH_EMAIL INTEGER;
-BEGIN
-  -- Determine if User by email exists
-  SELECT COUNT(*) INTO TOTAL_USERS_WITH_EMAIL 
-  FROM public."User" 
-  WHERE "primary_email" = new.email;
+-- CREATE OR REPLACE FUNCTION public.upsert_by_email() 
+-- RETURNS trigger as $$
+-- DECLARE TOTAL_USERS_WITH_EMAIL INTEGER;
+-- BEGIN
+--   -- Determine if User by email exists
+--   SELECT COUNT(*) INTO TOTAL_USERS_WITH_EMAIL 
+--   FROM public."User" 
+--   WHERE "primary_email" = new.email;
 
-  -- If exists, update vs insert 
-  IF (new.email IS NOT NULL AND TOTAL_USERS_WITH_EMAIL = 1) THEN
-    -- UPDATE THE EXISTING RECORD
-    RAISE NOTICE 'New Auth User with auth.user.id % triggered UPDATE of existing User. Email: %s', new.id, new.email;
+--   -- If exists, update vs insert 
+--   IF (new.email IS NOT NULL AND TOTAL_USERS_WITH_EMAIL = 1) THEN
+--     -- UPDATE THE EXISTING RECORD
+--     RAISE NOTICE 'New Auth User with auth.user.id % triggered UPDATE of existing User. Email: %s', new.id, new.email;
 
-    UPDATE public."User"  
-    SET 
-      auth_id = new.id,
-      name = new.raw_user_meta_data->>'full_name', 
-      avatar_url = new.raw_user_meta_data->>'avatar_url' 
-    WHERE "primary_email" = new.email;
-  ELSE
-    -- INSERT NEW RECORD
-    RAISE NOTICE 'New Auth User with auth.user.id % triggered creation of new User. Email: %s', new.id, new.email;  
-    INSERT INTO public."User" 
-      (auth_id, name, avatar_url, primary_email)
-    VALUES (
-      new.id, 
-      new.raw_user_meta_data->>'full_name', 
-      new.raw_user_meta_data->>'avatar_url', 
-      LOWER(new.email)
-    );
-  END IF;
-  RETURN new;
-END;
-$$ language plpgsql security definer;
+--     UPDATE public."User"  
+--     SET 
+--       auth_id = new.id,
+--       name = new.raw_user_meta_data->>'full_name', 
+--       avatar_url = new.raw_user_meta_data->>'avatar_url' 
+--     WHERE "primary_email" = new.email;
+--   ELSE
+--     -- INSERT NEW RECORD
+--     RAISE NOTICE 'New Auth User with auth.user.id % triggered creation of new User. Email: %s', new.id, new.email;  
+--     INSERT INTO public."User" 
+--       (auth_id, name, avatar_url, primary_email)
+--     VALUES (
+--       new.id, 
+--       new.raw_user_meta_data->>'full_name', 
+--       new.raw_user_meta_data->>'avatar_url', 
+--       LOWER(new.email)
+--     );
+--   END IF;
+--   RETURN new;
+-- END;
+-- $$ language plpgsql security definer;
 
--- Wire up trigger
-create trigger on_auth_user_created
-  after insert on auth.users
-  for each row execute procedure public.upsert_by_email();
+-- -- Wire up trigger
+-- create trigger on_auth_user_created
+--   after insert on auth.users
+--   for each row execute procedure public.upsert_by_email();
 
 
 /* Create Some Core Organizations */
-COMMENT ON TABLE "User" is 'System Users';
-
 INSERT INTO "Organization" (id, is_squelched, name) 
 VALUES 
 ('5586d8db-340e-49b7-b22a-9ca26fa2b4b9', FALSE, 'MPLSART.COM'), 

@@ -7,7 +7,6 @@ import { User, UserData } from '../types';
 import IUserRepo from '../repos/IUserRepo';
 import supabase from '../../../infrastructure/supabase';
 import firebase from '../../../infrastructure/firebase/admin';
-import { decode } from 'punycode';
 
 // Controller Types
 // TODO: Do we need 'result' at this level?
@@ -18,6 +17,14 @@ export default class AuthenticationController {
 
   constructor(repository: IUserRepo) {
     this.orgRepo = repository;
+  }
+
+  public async getContextUser(): UserResponse {
+    const opUser = await this.orgRepo.getByEmail('blaine@mplsart.com');
+    if (opUser.isEmpty())
+      throw new DoesNotExistException('Unable to get user account');
+
+    return { result: opUser.get() };
   }
 
   public async firebaseAuthenticate(idToken: string): UserResponse {

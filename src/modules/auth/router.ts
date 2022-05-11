@@ -1,10 +1,16 @@
 // Auth Router
 import express from 'express';
+import { NextFunction, Request, Response } from 'express';
 import AuthenticationController from './controllers/AuthenticationController';
 import SupaUserRepo from './repos/SupaUserRepo';
+import authContext from '../../infrastructure/middleware/authContext';
 import * as ex from '../../infrastructure/exceptions';
 
 const router = express.Router();
+
+router.get('/me', authContext, async (req, res, next) => {
+  return res.send(req.user);
+});
 
 router.post('/authenticate/firebase', async (_req, res, next) => {
   const accessToken = _req.body.firebaseIdToken;
