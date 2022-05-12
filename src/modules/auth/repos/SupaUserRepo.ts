@@ -10,26 +10,26 @@ export default class SupaUserRepo implements IUserRepo {
    * Get All Organizations
    * @returns A list of Organizations
    */
-  async getAll(): Promise<User[]> {
-    const { data, error } = await supabase.from<UserRecord>('User').select('*');
+  // async getAll(): Promise<User[]> {
+  //   const { data, error } = await supabase.from<UserRecord>('User').select('*');
 
-    if (error) throw Error(error.message);
-    return data.map((u) => u);
-  }
+  //   if (error) throw Error(error.message);
+  //   return data.map((u) => u);
+  // }
 
   /**
    * Search for a list Organizations
    * @returns A list of Organizations
    */
-  async search(term: string): Promise<User[]> {
-    const { data, error } = await supabase
-      .from<UserRecord>('User')
-      .select('*')
-      .ilike('name', `%${term}%`);
+  // async search(term: string): Promise<User[]> {
+  //   const { data, error } = await supabase
+  //     .from<UserRecord>('User')
+  //     .select('*')
+  //     .ilike('name', `%${term}%`);
 
-    if (error) throw Error(error.message);
-    return data.map((u) => u) as User[];
-  }
+  //   if (error) throw Error(error.message);
+  //   return data.map((u) => u) as User[];
+  // }
 
   async getByAuthId(authId: string): Promise<Optional<User>> {
     const resp = await supabase
@@ -127,34 +127,34 @@ export default class SupaUserRepo implements IUserRepo {
     return data[0];
   }
 
-  async rename(userId: string, name: string): Promise<User> {
-    const resp = await supabase
-      .from<UserRecord>('User')
-      .update({ name: name })
-      .match({ id: userId });
+  // async rename(userId: string, name: string): Promise<User> {
+  //   const resp = await supabase
+  //     .from<UserRecord>('User')
+  //     .update({ name: name })
+  //     .match({ id: userId });
 
-    const { data, error } = resp;
-    if (error) throw Error(error.message); // UUID syntax, etc
-    if (data.length == 0) throw new DoesNotExistException('Resource');
-    return data[0];
-  }
+  //   const { data, error } = resp;
+  //   if (error) throw Error(error.message); // UUID syntax, etc
+  //   if (data.length == 0) throw new DoesNotExistException('Resource');
+  //   return data[0];
+  // }
 
-  async update(user: User): Promise<User> {
-    const o = user;
+  // async update(user: User): Promise<User> {
+  //   const o = user;
 
-    const resp = await supabase
-      .from<UserRecord>('User')
-      .update({
-        name: o.name,
-        is_squelched: o.is_squelched
-      })
-      .match({ id: o.id });
+  //   const resp = await supabase
+  //     .from<UserRecord>('User')
+  //     .update({
+  //       name: o.name,
+  //       is_squelched: o.is_squelched
+  //     })
+  //     .match({ id: o.id });
 
-    const { data, error } = resp;
-    if (error) throw Error(error.message); // UUID syntax, etc
-    if (data.length == 0) throw new DoesNotExistException('Resource');
-    return data[0];
-  }
+  //   const { data, error } = resp;
+  //   if (error) throw Error(error.message); // UUID syntax, etc
+  //   if (data.length == 0) throw new DoesNotExistException('Resource');
+  //   return data[0];
+  // }
 
   // Delete should only be done internally. Hold off on implementing...
   // async delete(org: Organization): Promise<DatabaseId> {

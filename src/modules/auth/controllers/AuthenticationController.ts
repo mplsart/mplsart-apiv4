@@ -13,14 +13,14 @@ import firebase from '../../../infrastructure/firebase/admin';
 type UserResponse = Promise<{ result: User }>;
 
 export default class AuthenticationController {
-  private orgRepo: IUserRepo;
+  private userRepo: IUserRepo;
 
   constructor(repository: IUserRepo) {
-    this.orgRepo = repository;
+    this.userRepo = repository;
   }
 
   public async getContextUser(): UserResponse {
-    const opUser = await this.orgRepo.getByEmail('blaine@mplsart.com');
+    const opUser = await this.userRepo.getByEmail('blaine@mplsart.com');
     if (opUser.isEmpty())
       throw new DoesNotExistException('Unable to get user account');
 
@@ -38,7 +38,7 @@ export default class AuthenticationController {
     }
 
     //let user: User;
-    const opUser = await this.orgRepo.getByEmail(decodedToken.email);
+    const opUser = await this.userRepo.getByEmail(decodedToken.email);
     let user: User;
     if (opUser.isEmpty()) {
       // // Create the user Record...
@@ -54,7 +54,7 @@ export default class AuthenticationController {
       };
       // Create user
       // TODO: This might need a try/catch
-      user = await this.orgRepo.create(d);
+      user = await this.userRepo.create(d);
     } else {
       // User exists: Simply Return it
       user = opUser.get();
@@ -88,7 +88,7 @@ export default class AuthenticationController {
     }
 
     let user: User;
-    const opUser = await this.orgRepo.getByAuthId(supaUser.id);
+    const opUser = await this.userRepo.getByAuthId(supaUser.id);
     if (opUser.isEmpty()) {
       // Create the user Record...
       const d: UserData = {
@@ -104,7 +104,7 @@ export default class AuthenticationController {
 
       // Create user
       // TODO: This might need a try/catch
-      user = await this.orgRepo.create(d);
+      user = await this.userRepo.create(d);
       //throw new DoesNotExistException('User does not exist');
     } else {
       // User exists: Simply Return it
