@@ -5,16 +5,26 @@ import { Optional } from 'typescript-optional';
 import { Datastore, Key } from '@google-cloud/datastore';
 import {
   get_resource_id_from_key,
-  get_entity_by_resource_id
+  get_entity_by_resource_id,
+  get_key_from_resource_id
 } from '../../../infrastructure/datastore/utils';
 
 const KIND = 'User';
-// Model Representing the Datastore Entity
+
+// Types for Datastore Payloads
 interface Record {
-  [key: symbol]: Key;
   firstname: string;
   lastname: string;
   website: string;
+}
+
+interface Entity extends Record {
+  [key: symbol]: Key;
+}
+
+interface WriteData {
+  key: Key;
+  data: Record;
 }
 
 export default class DSOrgRepo implements IAuthorRepo {
@@ -26,7 +36,7 @@ export default class DSOrgRepo implements IAuthorRepo {
   async getAll(): Promise<BlogAuthor[]> {
     const query = this.datastore.createQuery(KIND).order('lastname');
     const [records] = await this.datastore.runQuery(query);
-    return records.map((r: Record) => this.toModel(r));
+    return records.map((r: Record) => this.toModel(r as Entity));
   }
 
   async getById(id: string): Promise<Optional<BlogAuthor>> {
@@ -38,17 +48,44 @@ export default class DSOrgRepo implements IAuthorRepo {
     }
 
     if (!r) return Optional.empty();
-    return Optional.of(this.toModel(r as Record));
+    return Optional.of(this.toModel(r as Entity));
   }
 
-  async create(organization: BlogAuthorData): Promise<BlogAuthor> {
-    throw Error('not implemented');
-  }
-  async update(organization: BlogAuthor): Promise<BlogAuthor> {
-    throw Error('not implemented');
+  async create(data: BlogAuthorData): Promise<BlogAuthor> {
+    const txn = this.datastore.transaction();
+    const key = this.datastore.key(KIND);
+
+    try {
+      // Start Transaction
+      await txn.run();
+
+      // Asseble the data to write
+      const entity = {
+        key: key,
+        data: data
+      };
+
+      // Attempt to write the entity
+      await this.datastore.save(entity);
+
+      // Attempt to Fetch the newly created entity
+      const [record] = await txn.get(key);
+      await txn.commit();
+
+      // Finally Map the newly created record
+      return this.toModel(record);
+    } catch (err) {
+      await txn.rollback();
+      throw err;
+    }
   }
 
-  toModel(r: Record): BlogAuthor {
+  async update(m: BlogAuthor): Promise<BlogAuthor> {
+    await this.datastore.save(this.toRecord(m));
+    return m;
+  }
+
+  toModel(r: Entity): BlogAuthor {
     // Map Datastore Key to Resource Id
     const resource_id = get_resource_id_from_key(r[this.datastore.KEY]);
 
@@ -66,12 +103,17 @@ export default class DSOrgRepo implements IAuthorRepo {
     return m as BlogAuthor;
   }
 
-  toRecord(m: BlogAuthor): Record {
-    throw new Error('not implemented');
-    // const r: Partial<Record> = {};
-    // r.firstname = m.firstname;
-    // r.lastname = m.lastname;
-    // r.website = m.website;
-    // return r as BlogAuthor;
+  toRecord(m: BlogAuthor): WriteData {
+    // TODO: This could create a partial and we could reuse for create...
+    const key = get_key_from_resource_id(this.datastore, m._meta.resource_id);
+
+    return {
+      key: key,
+      data: {
+        firstname: m.firstname,
+        lastname: m.lastname,
+        website: m.website
+      }
+    };
   }
 }

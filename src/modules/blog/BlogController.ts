@@ -34,25 +34,27 @@ export default class BlogController {
   //   return await this.orgRepo.search(term);
   // }
 
-  // public async create(name: string): Promise<Organization> {
-  //   const tempOrg: OrganizationData = { name: name, is_squelched: false };
-  //   return await this.orgRepo.create(tempOrg);
-  // }
+  public async create(params: BlogAuthorData): Promise<BlogAuthor> {
+    const updated = await this.authorRepo.create(params);
+    return updated;
+  }
 
-  // public async rename(
-  //   organizationId: DatabaseId,
-  //   name: string
-  // ): Promise<Organization> {
-  //   // Ensure organization exists
-  //   const orgOp = await this.orgRepo.getById(organizationId);
-  //   if (orgOp.isEmpty())
-  //     throw new DoesNotExistException('Organization does not exist');
+  public async updateAuthor(
+    authorId: DatabaseId,
+    params: BlogAuthorData
+  ): Promise<BlogAuthor> {
+    // Ensure exists
+    const op = await this.authorRepo.getById(authorId);
+    if (op.isEmpty()) throw new DoesNotExistException('Author does not exist');
 
-  //   const org = orgOp.get();
-  //   org.name = name;
-  //   const newOrg = await this.orgRepo.update(org);
-  //   return newOrg;
-  // }
+    const author = op.get();
+    author.firstname = params.firstname;
+    author.lastname = params.lastname;
+    author.website = params.website;
+
+    const updated = await this.authorRepo.update(author);
+    return updated;
+  }
 
   // public async squelch(organizationId: DatabaseId): Promise<Organization> {
   //   // Ensure organization exists
