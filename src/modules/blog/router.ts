@@ -1,7 +1,5 @@
 // Blog Router
 import express from 'express';
-
-import { Datastore } from '@google-cloud/datastore';
 import DSAuthorRepo from './repos/DSAuthorRepo';
 import BlogController from './BlogController';
 

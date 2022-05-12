@@ -1,6 +1,6 @@
 // Blog Types
 
-import { DatabaseId } from '~/shared/core/types';
+import { DatabaseId, IResource } from '~/shared/core/types';
 
 export type BlogAuthorData = {
   firstname: string;
@@ -8,6 +8,6 @@ export type BlogAuthorData = {
   website: string;
 };
 
-export interface BlogAuthor extends BlogAuthorData {
+export interface BlogAuthor extends BlogAuthorData, IResource {
   id: DatabaseId;
 }
