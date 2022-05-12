@@ -38,4 +38,35 @@ describe('AuthController.getContextUser should', () => {
       DoesNotExistException
     );
   });
+
+  test('should return User when email matches', async () => {
+    const fakeUser: User = {
+      id: 'fake0123',
+      name: 'fakeUser',
+      primary_email: 'fake@fake.com',
+      created_at: '',
+      updated_at: '',
+      is_support: false,
+      is_initialized: true,
+      is_squelched: false
+    };
+
+    const MockUserRepo = SupaUserRepo as jest.Mock<SupaUserRepo>;
+    const mockResult: Optional<User> = Optional.of(fakeUser);
+
+    MockUserRepo.mockImplementation(() => {
+      return {
+        getByAuthId: jest.fn(),
+        getByEmail: jest.fn(() => Promise.resolve(mockResult)),
+        getById: jest.fn(),
+        create: jest.fn()
+      };
+    });
+
+    const userRepo = new SupaUserRepo();
+    const controller = new AuthController(userRepo);
+
+    // Run Code to Test & Check Results
+    await expect(controller.getContextUser()).resolves.toEqual(fakeUser);
+  });
 });

@@ -8,10 +8,6 @@ import IUserRepo from '../repos/IUserRepo';
 import supabase from '../../../infrastructure/supabase';
 import firebase from '../../../infrastructure/firebase/admin';
 
-// Controller Types
-// TODO: Do we need 'result' at this level?
-type UserResponse = Promise<{ result: User }>;
-
 export default class AuthenticationController {
   private userRepo: IUserRepo;
 
@@ -19,15 +15,15 @@ export default class AuthenticationController {
     this.userRepo = repository;
   }
 
-  public async getContextUser(): UserResponse {
+  public async getContextUser(): Promise<User> {
     const opUser = await this.userRepo.getByEmail('blaine@mplsart.com');
     if (opUser.isEmpty())
       throw new DoesNotExistException('Unable to get user account');
 
-    return { result: opUser.get() };
+    return opUser.get();
   }
 
-  public async firebaseAuthenticate(idToken: string): UserResponse {
+  public async firebaseAuthenticate(idToken: string): Promise<User> {
     // TODO: Handle all the expiration events, etc...
     const decodedToken = await firebase.auth.verifyIdToken(idToken);
 
@@ -62,10 +58,10 @@ export default class AuthenticationController {
 
     // TODO: Get user's organization memberships
 
-    return { result: user };
+    return user;
   }
 
-  public async supabaseAuthenticate(token: string): UserResponse {
+  public async supabaseAuthenticate(token: string): Promise<User> {
     const { data: supaUser, error } = await supabase.auth.api.getUser(token);
 
     console.error(error);
@@ -112,7 +108,6 @@ export default class AuthenticationController {
     }
 
     // TODO: Get user's organization memberships
-
-    return { result: user };
+    return user;
   }
 }

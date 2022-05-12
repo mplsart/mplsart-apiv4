@@ -11,7 +11,7 @@ orgRouter.get('/organizations', async (_req, res, next) => {
 
   try {
     const response = await controller.getAll();
-    return res.send(response);
+    return res.send({ result: response });
   } catch (err) {
     next(err);
   }
@@ -27,7 +27,7 @@ orgRouter.post('/organizations', async (_req, res, next) => {
   try {
     const params = validateData(CreateData, _req.body);
     const response = await controller.create(params.name);
-    return res.send(response);
+    return res.send({ result: response });
   } catch (err) {
     next(err);
   }
@@ -37,7 +37,7 @@ orgRouter.get('/organizations/:organizationId', async (_req, res, next) => {
   const controller = new OrganizationsController(new SupaOrgRepo());
   try {
     const response = await controller.getOrgById(_req.params.organizationId);
-    return res.send(response);
+    return res.send({ result: response });
   } catch (err) {
     next(err);
   }
@@ -54,7 +54,7 @@ orgRouter.patch('/organizations/:organizationId', async (_req, res, next) => {
       _req.params.organizationId,
       params.name
     );
-    return res.send(response);
+    return res.send({ result: response });
   } catch (err) {
     next(err);
   }
@@ -64,7 +64,7 @@ orgRouter.delete('/organizations/:organizationId', async (_req, res, next) => {
   const controller = new OrganizationsController(new SupaOrgRepo());
   try {
     const response = await controller.squelch(_req.params.organizationId);
-    return res.send(response);
+    return res.send({ result: response });
   } catch (err) {
     next(err);
   }

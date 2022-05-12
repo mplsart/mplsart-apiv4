@@ -4,10 +4,6 @@ import { Organization, OrganizationData } from '../types';
 import IOrgRepo from '../repos/IOrgRepo';
 
 // Controller Types
-// TODO: Do we need 'result' at this level?
-type OrganizationResponse = Promise<{ result: Organization }>;
-type OrganizationListResponse = Promise<{ result: Organization[] }>;
-
 export default class OrganizationsController {
   private orgRepo: IOrgRepo;
 
@@ -20,38 +16,35 @@ export default class OrganizationsController {
    * @param organizationId The `DatabaseId` of the requested `Organization`
    * @returns Organization
    */
-  public async getOrgById(organizationId: DatabaseId): OrganizationResponse {
+  public async getOrgById(organizationId: DatabaseId): Promise<Organization> {
     const orgOp = await this.orgRepo.getById(organizationId);
     if (orgOp.isEmpty())
       throw new DoesNotExistException('Organization does not exist');
 
-    return { result: orgOp.get() };
+    return orgOp.get();
   }
 
   /**
    * Fetch a list of all organizations
    * @returns A list of Organizations
    */
-  public async getAll(): OrganizationListResponse {
-    const orgs = await this.orgRepo.getAll();
-    return { result: orgs };
+  public async getAll(): Promise<Organization[]> {
+    return await this.orgRepo.getAll();
   }
 
-  public async search(term: string): OrganizationListResponse {
-    const orgs = await this.orgRepo.search(term);
-    return { result: orgs };
+  public async search(term: string): Promise<Organization[]> {
+    return await this.orgRepo.search(term);
   }
 
-  public async create(name: string): OrganizationResponse {
+  public async create(name: string): Promise<Organization> {
     const tempOrg: OrganizationData = { name: name, is_squelched: false };
-    const org = await this.orgRepo.create(tempOrg);
-    return { result: org };
+    return await this.orgRepo.create(tempOrg);
   }
 
   public async rename(
     organizationId: DatabaseId,
     name: string
-  ): Promise<OrganizationResponse> {
+  ): Promise<Organization> {
     // Ensure organization exists
     const orgOp = await this.orgRepo.getById(organizationId);
     if (orgOp.isEmpty())
@@ -60,10 +53,10 @@ export default class OrganizationsController {
     const org = orgOp.get();
     org.name = name;
     const newOrg = await this.orgRepo.update(org);
-    return { result: newOrg };
+    return newOrg;
   }
 
-  public async squelch(organizationId: DatabaseId): OrganizationResponse {
+  public async squelch(organizationId: DatabaseId): Promise<Organization> {
     // Ensure organization exists
     const orgOp = await this.orgRepo.getById(organizationId);
     if (orgOp.isEmpty())
@@ -72,6 +65,6 @@ export default class OrganizationsController {
     const org = orgOp.get();
     org.is_squelched = true;
     const newOrg = await this.orgRepo.update(org);
-    return { result: newOrg };
+    return newOrg;
   }
 }
