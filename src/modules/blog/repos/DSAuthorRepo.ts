@@ -3,7 +3,10 @@ import IAuthorRepo from './IAuthorRepo';
 import { BlogAuthor, BlogAuthorData } from '../types';
 import { Optional } from 'typescript-optional';
 import { Datastore, Key } from '@google-cloud/datastore';
-import { get_resource_id_from_key } from '../../../infrastructure/datastore/utils';
+import {
+  get_resource_id_from_key,
+  get_entity_by_resource_id
+} from '../../../infrastructure/datastore/utils';
 
 const KIND = 'User';
 // Model Representing the Datastore Entity
@@ -27,7 +30,15 @@ export default class DSOrgRepo implements IAuthorRepo {
   }
 
   async getById(id: string): Promise<Optional<BlogAuthor>> {
-    throw Error('not implemented');
+    let r: Record | undefined;
+    try {
+      r = await get_entity_by_resource_id(this.datastore, KIND, id);
+    } catch (err) {
+      console.error(err);
+    }
+
+    if (!r) return Optional.empty();
+    return Optional.of(this.toModel(r as Record));
   }
 
   async create(organization: BlogAuthorData): Promise<BlogAuthor> {

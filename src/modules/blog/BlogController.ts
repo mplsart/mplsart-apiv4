@@ -11,23 +11,22 @@ export default class BlogController {
   }
 
   /**
-   * Retrieve an `Organization` by it's database id
-   * @param organizationId The `DatabaseId` of the requested `Organization`
-   * @returns Organization
+   * Retrieve an `BlogAuthor` by it's datastore resource id
+   * @param resourceId The `RESOURCE_ID` of the requested `BlogAuthor`
+   * @returns BlogAuthor
    */
-  // public async getOrgById(organizationId: DatabaseId): Promise<Organization> {
-  //   const orgOp = await this.orgRepo.getById(organizationId);
-  //   if (orgOp.isEmpty())
-  //     throw new DoesNotExistException('Organization does not exist');
 
-  //   return orgOp.get();
-  // }
+  public async getAuthorByResourceId(resourceId: string): Promise<BlogAuthor> {
+    const op = await this.authorRepo.getById(resourceId);
+    if (op.isEmpty()) throw new DoesNotExistException('Author does not exist');
+    return op.get();
+  }
 
   /**
    * Fetch a list of all authors
    * @returns A list of BlogAuthor Models
    */
-  public async getAll(): Promise<BlogAuthor[]> {
+  public async getAllAuthors(): Promise<BlogAuthor[]> {
     return await this.authorRepo.getAll();
   }
 

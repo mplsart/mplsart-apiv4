@@ -10,7 +10,20 @@ const router = express.Router();
 router.get('/authors', async (req, res, next) => {
   const controller = new BlogController(new DSAuthorRepo());
   try {
-    const response = await controller.getAll();
+    const response = await controller.getAllAuthors();
+    return res.send({ result: response });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/authors/:authorId', async (_req, res, next) => {
+  const controller = new BlogController(new DSAuthorRepo());
+
+  try {
+    const response = await controller.getAuthorByResourceId(
+      _req.params.authorId
+    );
     return res.send({ result: response });
   } catch (err) {
     next(err);
