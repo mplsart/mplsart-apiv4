@@ -1,12 +1,11 @@
 import express from 'express';
-import PingController from '../controllers/ping';
+import { authRouter } from '../modules/auth/router';
+import { organizationRouter } from '../modules/organizations/router';
 
 const router = express.Router();
 
-router.get('/ping', async (_req, res) => {
-  const controller = new PingController();
-  const response = await controller.getMessage();
-  return res.send(response);
-});
+// Organization Management
+router.use('/orgs', organizationRouter);
+router.use('/auth', authRouter);
 
 export default router;

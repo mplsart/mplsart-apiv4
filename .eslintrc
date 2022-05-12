@@ -12,7 +12,7 @@
     "prettier"
   ],
   "rules": {
-    "no-console": 0, // Means warning
+    "no-console": 0, // Allow until we get logging in place
     "prettier/prettier": 2 // Means error
   }
 }
