@@ -1,13 +1,21 @@
 import { DoesNotExistException } from '../../infrastructure/exceptions';
 import { DatabaseId } from '../../shared/core/types';
-import { BlogAuthor, BlogAuthorData } from './types';
+import {
+  BlogAuthor,
+  BlogAuthorData,
+  BlogCategory,
+  BlogCategoryData
+} from './types';
 import IAuthorRepo from './repos/IAuthorRepo';
+import ICategoryRepo from './repos/ICategoryRepo';
 
 export default class BlogController {
   private authorRepo: IAuthorRepo;
+  private categoryRepo: ICategoryRepo;
 
-  constructor(authorRepo: IAuthorRepo) {
+  constructor(authorRepo: IAuthorRepo, categoryRepo: ICategoryRepo) {
     this.authorRepo = authorRepo;
+    this.categoryRepo = categoryRepo;
   }
 
   /**
@@ -30,11 +38,7 @@ export default class BlogController {
     return await this.authorRepo.getAll();
   }
 
-  // public async search(term: string): Promise<Organization[]> {
-  //   return await this.orgRepo.search(term);
-  // }
-
-  public async create(params: BlogAuthorData): Promise<BlogAuthor> {
+  public async createAuthor(params: BlogAuthorData): Promise<BlogAuthor> {
     const updated = await this.authorRepo.create(params);
     return updated;
   }
@@ -56,15 +60,39 @@ export default class BlogController {
     return updated;
   }
 
-  // public async squelch(organizationId: DatabaseId): Promise<Organization> {
-  //   // Ensure organization exists
-  //   const orgOp = await this.orgRepo.getById(organizationId);
-  //   if (orgOp.isEmpty())
-  //     throw new DoesNotExistException('Organization does not exist');
+  // Blog Categories
 
-  //   const org = orgOp.get();
-  //   org.is_squelched = true;
-  //   const newOrg = await this.orgRepo.update(org);
-  //   return newOrg;
-  // }
+  public async getCategoryBySlug(slug: string): Promise<BlogCategory> {
+    const op = await this.categoryRepo.getBySlug(slug);
+    if (op.isEmpty())
+      throw new DoesNotExistException(
+        `Category with slug ${slug} does not exist`
+      );
+    return op.get();
+  }
+
+  public async getCategoryByResourceId(
+    resourceId: string
+  ): Promise<BlogCategory> {
+    const op = await this.categoryRepo.getById(resourceId);
+    if (op.isEmpty())
+      throw new DoesNotExistException(`Category does not exist`);
+    return op.get();
+  }
+
+  public async getAllCategories(): Promise<BlogCategory[]> {
+    return await this.categoryRepo.getAll();
+  }
+
+  public async updateCategory(
+    categoryId: DatabaseId,
+    params: BlogCategoryData
+  ): Promise<BlogAuthor> {
+    throw new Error('updateCategory not implemented');
+  }
+
+  public async createCategory(params: BlogCategoryData): Promise<BlogCategory> {
+    const updated = await this.categoryRepo.create(params);
+    return updated;
+  }
 }

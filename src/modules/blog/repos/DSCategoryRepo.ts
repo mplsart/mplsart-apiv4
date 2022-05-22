@@ -27,7 +27,7 @@ interface WriteData {
   data: Record;
 }
 
-export default class DSOrgRepo implements ICategoryRepo {
+export default class DSCategoryRepo implements ICategoryRepo {
   datastore: Datastore;
 
   constructor() {
@@ -38,6 +38,20 @@ export default class DSOrgRepo implements ICategoryRepo {
     const query = this.datastore.createQuery(KIND).order('slug');
     const [records] = await this.datastore.runQuery(query);
     return records.map((r: Record) => this.toModel(r as Entity));
+  }
+
+  async getBySlug(slug: string): Promise<Optional<BlogCategory>> {
+    const clean_slug = slug.toLowerCase().trim();
+    const query = this.datastore.createQuery(KIND).filter('slug', clean_slug);
+    const [records] = await this.datastore.runQuery(query);
+
+    // If Exactly 1 record was returned
+    if (records.length == 1) {
+      return Optional.of(this.toModel(records[0] as Entity));
+    }
+
+    // Otherwise ...
+    return Optional.empty();
   }
 
   async getById(id: string): Promise<Optional<BlogCategory>> {

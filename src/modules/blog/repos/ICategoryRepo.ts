@@ -5,6 +5,7 @@ import { Optional } from 'typescript-optional';
 export default interface IBlogCategoryRepo {
   getAll(): Promise<BlogCategory[]>;
   getById(id: string): Promise<Optional<BlogCategory>>;
+  getBySlug(slug: string): Promise<Optional<BlogCategory>>;
   create(data: BlogCategoryData): Promise<BlogCategory>;
   update(m: BlogCategory): Promise<BlogCategory>;
 }
