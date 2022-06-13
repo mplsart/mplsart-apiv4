@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import SupaUserRepo from '../../modules/auth/repos/SupaUserRepo';
-import firebase from '../../infrastructure/firebase/admin';
+import SupaUserRepo from '~/modules/auth/repos/SupaUserRepo';
+import firebase from '~/infrastructure/firebase/admin';
 import { AuthenticationException } from '../exceptions';
 // Configurable middleware
 // https://expressjs.com/en/guide/writing-middleware.html

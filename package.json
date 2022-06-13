@@ -70,7 +70,7 @@
       "src"
     ],
     "ext": "ts",
-    "exec": "GOOGLE_APPLICATION_CREDENTIALS=./local/local-dev-service-account.json ts-node src/index.ts"
+    "exec": "GOOGLE_APPLICATION_CREDENTIALS=./local/local-dev-service-account.json NODE_ENV=development ts-node src/index.ts"
   },
   "_moduleAliases": {
     "~": "./src"

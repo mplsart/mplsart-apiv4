@@ -1,9 +1,9 @@
-import supabase from '../../../infrastructure/supabase';
-import IOrgRepo from './IOrgRepo';
-import { Organization, OrganizationData } from '../types';
-import { DoesNotExistException } from '../../../infrastructure/exceptions';
-import { OrganizationRecord } from './types';
+import supabase from '~/infrastructure/supabase';
+import { DoesNotExistException } from '~/infrastructure/exceptions';
 import { Optional } from 'typescript-optional';
+import { Organization, OrganizationData } from '../types';
+import { OrganizationRecord } from './types';
+import IOrgRepo from './IOrgRepo';
 
 export default class SupaOrgRepo implements IOrgRepo {
   /**

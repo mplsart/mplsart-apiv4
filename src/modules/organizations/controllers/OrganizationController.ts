@@ -1,5 +1,5 @@
-import { DoesNotExistException } from '../../../infrastructure/exceptions';
-import { DatabaseId } from '../../../shared/core/types';
+import { DoesNotExistException } from '~/infrastructure/exceptions';
+import { DatabaseId } from '~/shared/core/types';
 import { Organization, OrganizationData } from '../types';
 import IOrgRepo from '../repos/IOrgRepo';
 

@@ -3,7 +3,7 @@ import { Datastore, Key } from '@google-cloud/datastore';
 import { InvalidDatastoreKey } from './errors';
 import { InvalidResourceId } from './errors';
 import { UnexpectedDatastoreKind } from './errors';
-import { RESOURCE_ID } from '../../shared/core/types';
+import { RESOURCE_ID } from '~/shared/core/types';
 
 const SEPARATOR = String.fromCharCode(30);
 const INTPREFIX = String.fromCharCode(31);

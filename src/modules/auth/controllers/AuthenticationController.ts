@@ -1,7 +1,7 @@
 import {
   DoesNotExistException,
   AuthenticationException
-} from '../../../infrastructure/exceptions';
+} from '~/infrastructure/exceptions';
 
 import { User, UserData } from '../types';
 import IUserRepo from '../repos/IUserRepo';

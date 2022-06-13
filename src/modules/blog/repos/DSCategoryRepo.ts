@@ -7,7 +7,7 @@ import {
   get_resource_id_from_key,
   get_entity_by_resource_id,
   get_key_from_resource_id
-} from '../../../infrastructure/datastore/utils';
+} from '~/infrastructure/datastore/utils';
 
 const KIND = 'BlogCategory';
 

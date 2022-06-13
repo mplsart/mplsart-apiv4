@@ -1,5 +1,5 @@
 // Auth Types
-import { DatabaseId, DateStamp } from '../../shared/core/types';
+import { DatabaseId, DateStamp } from '~/shared/core/types';
 
 export type UserData = {
   name: string;

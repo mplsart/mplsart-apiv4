@@ -3,7 +3,7 @@ import SupaUserRepo from '../repos/SupaUserRepo';
 import { jest } from '@jest/globals';
 import { Optional } from 'typescript-optional';
 import { User } from '../types';
-import { DoesNotExistException } from '../../../infrastructure/exceptions';
+import { DoesNotExistException } from '~/infrastructure/exceptions';
 
 jest.mock('../repos/SupaUserRepo');
 jest.mock('@supabase/supabase-js');

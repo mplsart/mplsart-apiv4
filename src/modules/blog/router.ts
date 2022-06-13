@@ -3,8 +3,8 @@ import express from 'express';
 import DSAuthorRepo from './repos/DSAuthorRepo';
 import DSCategoryRepo from './repos/DSCategoryRepo';
 import BlogController from './BlogController';
-import superAdminRequired from '../../infrastructure/middleware/superAdminRequired';
-import validateData from '../../infrastructure/requests/validateData';
+import superAdminRequired from '~/infrastructure/middleware/superAdminRequired';
+import validateData from '~/infrastructure/requests/validateData';
 import { z } from 'zod';
 
 const router = express.Router();

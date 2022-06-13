@@ -1,7 +1,7 @@
 import express from 'express';
 import OrganizationsController from './controllers/OrganizationController';
 import { z } from 'zod';
-import validateData from '../../infrastructure/requests/validateData';
+import validateData from '~/infrastructure/requests/validateData';
 import SupaOrgRepo from './repos/SupaOrgRepo';
 
 const orgRouter = express.Router();

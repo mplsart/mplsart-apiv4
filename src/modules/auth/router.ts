@@ -2,8 +2,8 @@
 import express from 'express';
 import AuthenticationController from './controllers/AuthenticationController';
 import SupaUserRepo from './repos/SupaUserRepo';
-import authContext from '../../infrastructure/middleware/authContext';
-import * as ex from '../../infrastructure/exceptions';
+import authContext from '~/infrastructure/middleware/authContext';
+import * as ex from '~/infrastructure/exceptions';
 
 const router = express.Router();
 

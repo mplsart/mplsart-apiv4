@@ -1,7 +1,7 @@
-import supabase from '../../../infrastructure/supabase';
+import supabase from '~/infrastructure/supabase';
 import IUserRepo from './IUserRepo';
 import { User, UserData } from '../types';
-import { DoesNotExistException } from '../../../infrastructure/exceptions';
+import { DoesNotExistException } from '~/infrastructure/exceptions';
 import { UserRecord } from './types';
 import { Optional } from 'typescript-optional';
 

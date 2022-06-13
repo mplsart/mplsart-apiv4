@@ -41,6 +41,10 @@ export default {
   //   "clover"
   // ],
 
+  moduleNameMapper: {
+    '^~/(.*)$': '<rootDir>/src/$1'
+  },
+
   // An object that configures minimum threshold enforcement for coverage results
   // coverageThreshold: undefined,
 
