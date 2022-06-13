@@ -1,5 +1,5 @@
 import express from 'express';
-import { authRouter } from '../modules/auth/router';
+import { authRouter } from '~/modules/auth/router';
 import { blogRouter } from '../modules/blog/router';
 import { organizationRouter } from '../modules/organizations/router';
 

@@ -1,3 +1,6 @@
+import moduleAlias from 'module-alias';
+moduleAlias.addAliases({ '~': `${__dirname}` });
+
 import 'dotenv/config';
 import express, { Application } from 'express';
 import morgan from 'morgan';
