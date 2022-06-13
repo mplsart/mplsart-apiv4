@@ -5,8 +5,8 @@ import {
 
 import { User, UserData } from '../types';
 import IUserRepo from '../repos/IUserRepo';
-import supabase from '../../../infrastructure/supabase';
-import firebase from '../../../infrastructure/firebase/admin';
+import supabase from '~/infrastructure/supabase';
+import firebase from '~/infrastructure/firebase/admin';
 
 export default class AuthenticationController {
   private userRepo: IUserRepo;

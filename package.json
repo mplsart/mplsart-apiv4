@@ -4,10 +4,10 @@
   "description": "Node/Express API for MPLSART",
   "main": "index.js",
   "scripts": {
-    "start": "node build/src/index.js",
+    "start": "node build/index.js",
     "predev": "npm run swagger",
     "prebuild": "npm run swagger",
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "dev": "concurrently \"nodemon\" \"nodemon -x tsoa spec\"",
     "swagger": "tsoa spec",
     "test": "jest",
