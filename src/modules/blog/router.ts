@@ -8,7 +8,12 @@ import validateData from '~/infrastructure/requests/validateData';
 import DSAuthorRepo from './repos/DSAuthorRepo';
 import DSCategoryRepo from './repos/DSCategoryRepo';
 import BlogController from './BlogController';
-import { CategoryListParams, CategoryListParamsType } from './types';
+import {
+  AuthorListParams,
+  AuthorListParamsType,
+  CategoryListParams,
+  CategoryListParamsType
+} from './types';
 
 const router = express.Router();
 
@@ -35,7 +40,12 @@ router.get('/authors', async (req, res, next) => {
   );
 
   try {
-    const response = await controller.getAllAuthors();
+    // Validate list query params
+    const q = req.query;
+    const params = validateParams<AuthorListParamsType>(AuthorListParams, q);
+
+    // Fetch Data
+    const response = await controller.getAllAuthors(params);
     return res.send({ result: response });
   } catch (err) {
     next(err);

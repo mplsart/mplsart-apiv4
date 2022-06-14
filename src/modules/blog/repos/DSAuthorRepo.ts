@@ -1,6 +1,6 @@
 // Datastore Impementation of IAuthorRepo
 import IAuthorRepo from './IAuthorRepo';
-import { BlogAuthor, BlogAuthorData } from '../types';
+import { AuthorListParamsType, BlogAuthor, BlogAuthorData } from '../types';
 import { Optional } from 'typescript-optional';
 import { Datastore, Key } from '@google-cloud/datastore';
 import {
@@ -8,6 +8,7 @@ import {
   get_entity_by_resource_id,
   get_key_from_resource_id
 } from '~/infrastructure/datastore/utils';
+import { PaginatedResult } from '~/infrastructure/types';
 
 const KIND = 'User';
 
@@ -27,16 +28,45 @@ interface WriteData {
   data: Record;
 }
 
-export default class DSOrgRepo implements IAuthorRepo {
+export default class DSAuthorRepo implements IAuthorRepo {
   datastore: Datastore;
   constructor() {
     this.datastore = new Datastore();
   }
 
-  async getAll(): Promise<BlogAuthor[]> {
-    const query = this.datastore.createQuery(KIND).order('lastname');
-    const [records] = await this.datastore.runQuery(query);
-    return records.map((r: Record) => this.toModel(r as Entity));
+  async getAll(
+    params: AuthorListParamsType
+  ): Promise<PaginatedResult<BlogAuthor>> {
+    // Resolve params
+    const limit = params.limit;
+    const order = params.order;
+    const cursor = params.cursor;
+    const isDescending = true;
+
+    // Base Query
+    let query = this.datastore.createQuery(KIND).order('lastname');
+
+    // Order
+    if (order) query.order(order, { descending: isDescending });
+
+    // Limit
+    query = query.limit(limit);
+
+    // Start Cursor
+    if (cursor) query.start(cursor);
+
+    // Execute the query
+    const result = await this.datastore.runQuery(query);
+
+    // Isolate results
+    const more = !(result[1].moreResults == Datastore.NO_MORE_RESULTS);
+    const nextCursor = (more && result[1].endCursor) || null;
+
+    return {
+      result: result[0].map((r: Record) => this.toModel(r as Entity)),
+      more: more,
+      nextCursor: nextCursor
+    };
   }
 
   async getById(id: string): Promise<Optional<BlogAuthor>> {

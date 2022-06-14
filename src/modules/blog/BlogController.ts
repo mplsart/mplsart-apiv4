@@ -3,7 +3,10 @@ import { DoesNotExistException } from '~/infrastructure/exceptions';
 import { PaginatedResult } from '~/infrastructure/types';
 
 import { DatabaseId } from '~/shared/core/types';
-import { BlogAuthor, CategoryListParamsType } from './types';
+import { AuthorListParamsType } from './types';
+import { BlogAuthor } from './types';
+import { CategoryListParamsType } from './types';
+
 import { BlogAuthorData } from './types';
 import { BlogCategory } from './types';
 import { BlogCategoryData } from './types';
@@ -39,8 +42,10 @@ export default class BlogController {
    * Fetch a list of all authors
    * @returns A list of BlogAuthor Models
    */
-  public async getAllAuthors(): Promise<BlogAuthor[]> {
-    return await this.authorRepo.getAll();
+  public async getAllAuthors(
+    params: AuthorListParamsType
+  ): Promise<PaginatedResult<BlogAuthor>> {
+    return await this.authorRepo.getAll(params);
   }
 
   /**
