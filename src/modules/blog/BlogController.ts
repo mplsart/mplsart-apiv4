@@ -3,7 +3,7 @@ import { DoesNotExistException } from '~/infrastructure/exceptions';
 import { PaginatedResult } from '~/infrastructure/types';
 
 import { DatabaseId } from '~/shared/core/types';
-import { BlogAuthor, CategoryListParams } from './types';
+import { BlogAuthor, CategoryListParamsType } from './types';
 import { BlogAuthorData } from './types';
 import { BlogCategory } from './types';
 import { BlogCategoryData } from './types';
@@ -99,7 +99,7 @@ export default class BlogController {
   }
 
   public async getAllCategories(
-    params: CategoryListParams
+    params: CategoryListParamsType
   ): Promise<PaginatedResult<BlogCategory>> {
     return await this.categoryRepo.getAll(params);
   }

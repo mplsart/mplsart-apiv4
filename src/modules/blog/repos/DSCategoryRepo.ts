@@ -1,6 +1,11 @@
 // Datastore Impementation of ICategoryRepo
 import ICategoryRepo from './ICategoryRepo';
-import { BlogCategory, BlogCategoryData, CategoryListParams } from '../types';
+import {
+  BlogCategory,
+  BlogCategoryData,
+  CategoryListParams,
+  CategoryListParamsType
+} from '../types';
 import { Optional } from 'typescript-optional';
 import { Datastore, Key } from '@google-cloud/datastore';
 
@@ -36,7 +41,7 @@ export default class DSCategoryRepo implements ICategoryRepo {
   }
 
   async getAll(
-    params: CategoryListParams
+    params: CategoryListParamsType
   ): Promise<PaginatedResult<BlogCategory>> {
     // Resolve params
     const limit = params.limit;

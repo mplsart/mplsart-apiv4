@@ -2,14 +2,13 @@
 import express from 'express';
 import { z } from 'zod';
 import superAdmin from '~/infrastructure/middleware/superAdminRequired';
-import { BaseListParams } from '~/infrastructure/types';
 import validateParams from '~/infrastructure/requests/validateParams';
 import validateData from '~/infrastructure/requests/validateData';
 
 import DSAuthorRepo from './repos/DSAuthorRepo';
 import DSCategoryRepo from './repos/DSCategoryRepo';
 import BlogController from './BlogController';
-import { CategoryListParams } from './types';
+import { CategoryListParams, CategoryListParamsType } from './types';
 
 const router = express.Router();
 
@@ -115,7 +114,10 @@ router.get('/categories', async (req, res, next) => {
   try {
     // Validate list query params
     const q = req.query;
-    const params = validateParams<CategoryListParams>(BaseListParams, q);
+    const params = validateParams<CategoryListParamsType>(
+      CategoryListParams,
+      q
+    );
 
     // Fetch Data
     const response = await controller.getAllCategories(params);

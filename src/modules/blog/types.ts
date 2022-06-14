@@ -1,6 +1,5 @@
 // Blog Types
-
-import { BaseListParams } from '~/infrastructure/requests';
+import { z } from 'zod';
 import { DatabaseId, IResource } from '~/shared/core/types';
 
 // Blog Authors
@@ -25,5 +24,17 @@ export interface BlogCategory extends BlogCategoryData, IResource {
   id: DatabaseId;
 }
 
-export type CategoryListParams = BaseListParams;
-export type AuthorListParams = BaseListParams;
+export const AuthorListParams = z.object({
+  limit: z.preprocess((val) => (val ? Number(val) : 25), z.number()),
+  order: z.preprocess((val) => (val ? val : 'firstname'), z.string()),
+  cursor: z.string().optional()
+});
+
+export type AuthorListParams = z.infer<typeof CategoryListParams>;
+
+export const CategoryListParams = z.object({
+  limit: z.preprocess((val) => (val ? Number(val) : 25), z.number()),
+  order: z.preprocess((val) => (val ? val : 'title'), z.string()),
+  cursor: z.string().optional()
+});
+export type CategoryListParamsType = z.infer<typeof CategoryListParams>;
