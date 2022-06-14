@@ -1,13 +1,14 @@
 // Datastore Impementation of ICategoryRepo
 import ICategoryRepo from './ICategoryRepo';
-import { BlogCategory, BlogCategoryData } from '../types';
+import { BlogCategory, BlogCategoryData, CategoryListParams } from '../types';
 import { Optional } from 'typescript-optional';
 import { Datastore, Key } from '@google-cloud/datastore';
-import {
-  get_resource_id_from_key,
-  get_entity_by_resource_id,
-  get_key_from_resource_id
-} from '~/infrastructure/datastore/utils';
+
+import { get_resource_id_from_key } from '~/infrastructure/datastore/utils';
+import { get_entity_by_resource_id } from '~/infrastructure/datastore/utils';
+import { get_key_from_resource_id } from '~/infrastructure/datastore/utils';
+import { ConflictException } from '~/infrastructure/exceptions';
+import { PaginatedResult } from '~/infrastructure/types';
 
 const KIND = 'BlogCategory';
 
@@ -34,10 +35,39 @@ export default class DSCategoryRepo implements ICategoryRepo {
     this.datastore = new Datastore();
   }
 
-  async getAll(): Promise<BlogCategory[]> {
-    const query = this.datastore.createQuery(KIND).order('slug');
-    const [records] = await this.datastore.runQuery(query);
-    return records.map((r: Record) => this.toModel(r as Entity));
+  async getAll(
+    params: CategoryListParams
+  ): Promise<PaginatedResult<BlogCategory>> {
+    // Resolve params
+    const limit = params.limit;
+    const order = params.order;
+    const cursor = params.cursor;
+    const isDescending = true;
+
+    // Base query
+    let query = this.datastore.createQuery(KIND);
+
+    // Order
+    if (order) query.order(order, { descending: isDescending });
+
+    // Limit
+    query = query.limit(limit);
+
+    // Start Cursor
+    if (cursor) query.start(cursor);
+
+    // Execute the query
+    const result = await this.datastore.runQuery(query);
+
+    // Isolate results
+    const more = !(result[1].moreResults == Datastore.NO_MORE_RESULTS);
+    const nextCursor = (more && result[1].endCursor) || null;
+
+    return {
+      result: result[0].map((r: Record) => this.toModel(r as Entity)),
+      more: more,
+      nextCursor: nextCursor
+    };
   }
 
   async getBySlug(slug: string): Promise<Optional<BlogCategory>> {
@@ -45,12 +75,9 @@ export default class DSCategoryRepo implements ICategoryRepo {
     const query = this.datastore.createQuery(KIND).filter('slug', clean_slug);
     const [records] = await this.datastore.runQuery(query);
 
-    // If Exactly 1 record was returned
-    if (records.length == 1) {
+    if (records.length > 0) {
       return Optional.of(this.toModel(records[0] as Entity));
     }
-
-    // Otherwise ...
     return Optional.empty();
   }
 
@@ -74,13 +101,22 @@ export default class DSCategoryRepo implements ICategoryRepo {
       // Start Transaction
       await txn.run();
 
-      // Asseble the data to write
+      // Assemble the data to write
       const entity = {
         key: key,
         data: data
       };
 
+      // Ensure there isn't an entity with this slug already
+      const dupeCheck = await this.getBySlug(data.slug);
+      if (dupeCheck.isPresent()) {
+        throw new ConflictException(
+          `A category already exists with slug ${data.slug}`
+        );
+      }
+
       // Attempt to write the entity
+      // ?? If we use txn, key cannot be incomplete. Allocate ids?
       await this.datastore.save(entity);
 
       // Attempt to Fetch the newly created entity
@@ -96,6 +132,17 @@ export default class DSCategoryRepo implements ICategoryRepo {
   }
 
   async update(m: BlogCategory): Promise<BlogCategory> {
+    // Ensure there isn't a different entity with this slug already
+    const dupeCheck = await this.getBySlug(m.slug);
+    if (dupeCheck.isPresent()) {
+      if (dupeCheck.get()._meta.resource_id != m._meta.resource_id) {
+        throw new ConflictException(
+          `A category already exists with slug ${m.slug}`
+        );
+      }
+    }
+
+    // Persist to database...
     await this.datastore.save(this.toRecord(m));
     return m;
   }

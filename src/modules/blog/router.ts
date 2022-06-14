@@ -1,14 +1,19 @@
 // Blog Router
 import express from 'express';
+import { z } from 'zod';
+import superAdmin from '~/infrastructure/middleware/superAdminRequired';
+import { BaseListParams } from '~/infrastructure/types';
+import validateParams from '~/infrastructure/requests/validateParams';
+import validateData from '~/infrastructure/requests/validateData';
+
 import DSAuthorRepo from './repos/DSAuthorRepo';
 import DSCategoryRepo from './repos/DSCategoryRepo';
 import BlogController from './BlogController';
-import superAdminRequired from '~/infrastructure/middleware/superAdminRequired';
-import validateData from '~/infrastructure/requests/validateData';
-import { z } from 'zod';
+import { CategoryListParams } from './types';
 
 const router = express.Router();
 
+// Request Payloads
 const AuthorPayloadData = z.object({
   website: z.string(),
   firstname: z.string(),
@@ -21,7 +26,9 @@ const CategoryPayloadData = z.object({
   site_id: z.string()
 });
 
-// Authors Collection
+////////////////////////////////////////////////////////////////////////////////
+// Blog Authors
+////////////////////////////////////////////////////////////////////////////////
 router.get('/authors', async (req, res, next) => {
   const controller = new BlogController(
     new DSAuthorRepo(),
@@ -36,7 +43,7 @@ router.get('/authors', async (req, res, next) => {
   }
 });
 
-router.post('/authors', async (req, res, next) => {
+router.post('/authors', superAdmin, async (req, res, next) => {
   const controller = new BlogController(
     new DSAuthorRepo(),
     new DSCategoryRepo()
@@ -52,47 +59,40 @@ router.post('/authors', async (req, res, next) => {
 });
 
 // Author
-router.get('/authors/:authorId', async (_req, res, next) => {
+router.get('/authors/:authorId', async (req, res, next) => {
   const controller = new BlogController(
     new DSAuthorRepo(),
     new DSCategoryRepo()
   );
 
   try {
-    const response = await controller.getAuthorByResourceId(
-      _req.params.authorId
-    );
+    const authorId = req.params.authorId;
+    const response = await controller.getAuthorByResourceId(authorId);
     return res.send({ result: response });
   } catch (err) {
     next(err);
   }
 });
 
-router.put(
-  '/authors/:authorId',
-  superAdminRequired,
-  async (_req, res, next) => {
-    // Validate Request Data
-    const controller = new BlogController(
-      new DSAuthorRepo(),
-      new DSCategoryRepo()
-    );
+router.put('/authors/:authorId', superAdmin, async (req, res, next) => {
+  const controller = new BlogController(
+    new DSAuthorRepo(),
+    new DSCategoryRepo()
+  );
 
-    try {
-      const params = validateData(AuthorPayloadData, _req.body);
-      const response = await controller.updateAuthor(
-        _req.params.authorId,
-        params
-      );
-
-      return res.send({ result: response });
-    } catch (err) {
-      next(err);
-    }
+  try {
+    const authorId = req.params.authorId;
+    const params = validateData(AuthorPayloadData, req.body);
+    const response = await controller.updateAuthor(authorId, params);
+    return res.send({ result: response });
+  } catch (err) {
+    next(err);
   }
-);
+});
 
+////////////////////////////////////////////////////////////////////////////////
 // Categories Collection
+////////////////////////////////////////////////////////////////////////////////
 router.get('/categories', async (req, res, next) => {
   const controller = new BlogController(
     new DSAuthorRepo(),
@@ -100,7 +100,6 @@ router.get('/categories', async (req, res, next) => {
   );
 
   // Check if there is a slug
-  //  TODO: req.query.slug *could* be an array
   if (req.query && (req.query.slug || req.query.slug === '')) {
     const slug = req.query.slug as string;
     try {
@@ -112,24 +111,62 @@ router.get('/categories', async (req, res, next) => {
     return;
   }
 
+  // ... else it is the list collection
   try {
-    const response = await controller.getAllCategories();
-    return res.send({ result: response });
+    // Validate list query params
+    const q = req.query;
+    const params = validateParams<CategoryListParams>(BaseListParams, q);
+
+    // Fetch Data
+    const response = await controller.getAllCategories(params);
+    return res.send(response); // {result: ..., more: ..., cursor: ... }
   } catch (err) {
     next(err);
   }
 });
 
-router.get('/categories/:categoryId', async (_req, res, next) => {
+router.post('/categories', superAdmin, async (req, res, next) => {
   const controller = new BlogController(
     new DSAuthorRepo(),
     new DSCategoryRepo()
   );
 
   try {
-    const response = await controller.getCategoryByResourceId(
-      _req.params.categoryId
-    );
+    const params = validateData(CategoryPayloadData, req.body);
+    const response = await controller.createCategory(params);
+    return res.send({ result: response });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/categories/:categoryId', async (req, res, next) => {
+  const controller = new BlogController(
+    new DSAuthorRepo(),
+    new DSCategoryRepo()
+  );
+
+  try {
+    const categoryId = req.params.categoryId;
+    const response = await controller.getCategoryByResourceId(categoryId);
+    return res.send({ result: response });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/categories/:categoryId', superAdmin, async (req, res, next) => {
+  // Validate Request Data
+  const controller = new BlogController(
+    new DSAuthorRepo(),
+    new DSCategoryRepo()
+  );
+
+  try {
+    const params = validateData(CategoryPayloadData, req.body);
+    const categoryId = req.params.categoryId;
+    const response = await controller.updateCategory(categoryId, params);
+
     return res.send({ result: response });
   } catch (err) {
     next(err);

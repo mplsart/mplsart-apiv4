@@ -31,7 +31,6 @@ app.set('base', '/api/v4');
 app.use(express.json());
 app.use(morgan('tiny'));
 
-console.log(process.env.NODE_ENV);
 if (process.env.NODE_ENV === 'development') {
   app.set('json spaces', 4);
 }

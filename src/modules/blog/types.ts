@@ -1,5 +1,6 @@
 // Blog Types
 
+import { BaseListParams } from '~/infrastructure/requests';
 import { DatabaseId, IResource } from '~/shared/core/types';
 
 // Blog Authors
@@ -23,3 +24,6 @@ export type BlogCategoryData = {
 export interface BlogCategory extends BlogCategoryData, IResource {
   id: DatabaseId;
 }
+
+export type CategoryListParams = BaseListParams;
+export type AuthorListParams = BaseListParams;
