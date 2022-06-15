@@ -46,7 +46,7 @@ router.get('/authors', async (req, res, next) => {
 
     // Fetch Data
     const response = await controller.getAllAuthors(params);
-    return res.send({ result: response });
+    return res.send(response); // {result: ..., more: ..., cursor: ... }
   } catch (err) {
     next(err);
   }

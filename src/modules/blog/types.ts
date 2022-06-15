@@ -30,7 +30,7 @@ export const AuthorListParams = z.object({
   cursor: z.string().optional()
 });
 
-export type AuthorListParamsType = z.infer<typeof CategoryListParams>;
+export type AuthorListParamsType = z.infer<typeof AuthorListParams>;
 
 export const CategoryListParams = z.object({
   limit: z.preprocess((val) => (val ? Number(val) : 25), z.number()),
