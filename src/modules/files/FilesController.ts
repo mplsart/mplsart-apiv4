@@ -7,6 +7,7 @@ import { FileListParamsType } from './types';
 import { FileContainer } from './types';
 import { FileContainerData } from './types';
 import IFilesRepo from './repos/IFilesRepo';
+import { generateV4UploadSignedUrl } from './utils';
 
 export default class FilesController {
   private filesRepo: IFilesRepo;
@@ -72,4 +73,48 @@ export default class FilesController {
     // Persist
     return await this.filesRepo.update(model);
   }
+
+  // TODO: Ensure auth...
+  public async getUploadUrl(
+    originalFilename: string,
+    contentType: string
+  ): Promise<GetUploadUrlResponse> {
+    // Isolate the user to store on the audit
+    const uploadingUserId = 'blaine'; //req.userId;
+
+    // TODO: Is there additional cleaning to do? Probably...
+    originalFilename = originalFilename.replace(/\s/g, '_');
+
+    // Prepare request
+    const checkHash = (+new Date() + Math.random() * 100).toString(32);
+
+    if (!(process.env.TMP_UPLOAD_BUCKET && process.env.TMP_UPLOAD_FOLDER)) {
+      throw Error(
+        'process.env requires both TMP_UPLOAD_BUCKET and TMP_UPLOAD_FOLDER'
+      );
+    }
+
+    // Get the signed url and process result
+    const storageData = await generateV4UploadSignedUrl(
+      originalFilename,
+      contentType,
+      checkHash,
+      uploadingUserId,
+      process.env.TMP_UPLOAD_BUCKET,
+      process.env.TMP_UPLOAD_FOLDER
+    );
+
+    // Finally return the payload
+    return {
+      url: storageData.url,
+      fileName: storageData.fileName,
+      metadataHeaders: storageData.metadataHeaders
+    };
+  }
+}
+
+interface GetUploadUrlResponse {
+  url: string;
+  fileName: string;
+  metadataHeaders: Record<string, string>;
 }

@@ -3,7 +3,7 @@ import express from 'express';
 import { z } from 'zod';
 //import superAdmin from '~/infrastructure/middleware/superAdminRequired';
 import validateParams from '~/infrastructure/requests/validateParams';
-//import validateData from '~/infrastructure/requests/validateData';
+import validateData from '~/infrastructure/requests/validateData';
 
 import DSFilesRepo from './repos/DSFilesRepo';
 import FilesController from './FilesController';
@@ -14,6 +14,11 @@ const router = express.Router();
 // Request Payloads
 const FilePayloadData = z.object({
   caption: z.string()
+});
+
+const GetUploadUrlPayloadData = z.object({
+  originalFilename: z.string(),
+  contentType: z.string()
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -73,5 +78,22 @@ router.get('/list/:fileId', async (req, res, next) => {
 //     next(err);
 //   }
 // });
+
+// Get Upload Url
+router.post('/upload_url', async (req, res, next) => {
+  const controller = new FilesController(new DSFilesRepo());
+
+  const data = validateData(GetUploadUrlPayloadData, req.body);
+
+  try {
+    const response = await controller.getUploadUrl(
+      data.originalFilename,
+      data.contentType
+    );
+    return res.send({ result: response });
+  } catch (err) {
+    next(err);
+  }
+});
 
 export { router as filesRouter };
